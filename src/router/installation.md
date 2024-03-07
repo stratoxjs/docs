@@ -6,6 +6,15 @@
 npm install @stratox/pilot
 ```
 
+### Initialize
+
+```javascript
+import { Router, Dispatcher } from '@stratox/pilot';
+
+const router = new Router();
+const dispatcher = new Dispatcher();
+```
+
 ## Configuration options
 
 The dispatcher offers several configuration options to tailor its behavior to your application's needs.
