@@ -8,9 +8,9 @@ description: >-
 
 The Stratox template library is created using up-to-date methods, keeping its size at around 6 kb when bundled and minimized (gzipped). It works independently, smoothly running on all platforms without needing anything else. Stratox.js is a smart pick for applications and websites, ensuring great performance and quick load time. It's versatile, letting you load views asynchronously (with optional caching) or bundle them conveniently into your main JavaScript file.
 
-### Comming soon
+### [Startox framework](https://stratox.wazabii.se/)
 
-**Stratox will soon be available as a project**, enabling installation with MVC (model, view, controller) architecture, Tailwind CSS, and support for installable plugins.
+This is the Startox template engine library. If your looking for the framework, that is fully installable with controllers, routers, template engine, components and design system then [click here](https://stratox.wazabii.se/).
 
 ### User-Friendly
 
