@@ -82,7 +82,7 @@ The response structure, as illustrated with the router pattern `"/{page:product}
     "form": {},
     "request": {
         "get": "URLSearchParams",
-        "post": "FormData"
+        "post": {}
     }
 }
 ```
@@ -93,4 +93,4 @@ The response structure, as illustrated with the router pattern `"/{page:product}
 * **vars:** An object mapping path segments to keys.
 * **form:** Captures submitted DOM form elements.
 * **request.get:** An instance of URLSearchParams for GET requests.
-* **request.post:** An instance of FormData for POST requests.
+* **request.post:** An object for POST requests.

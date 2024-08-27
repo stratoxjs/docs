@@ -39,12 +39,12 @@ router.get('/articles/{id:[0-9]+}/{slug:[^/]+}', function(vars, request, path) {
 
 ### POST Request
 
-Creating a POST request is similarly efficient, targeting a `post` router. The request parameter will be converted into an instance of FormData to facilitate the request.
+Creating a POST request is similarly efficient, targeting a `post` router. The request parameter will be an object to facilitate the request.
 
 #### Arguments
 
 * **path (string):** Defines the URI, which can be a **regular path** or a **hash**.
-* **request (object):** Submits a POST request to the dispatcher. This will be processed into an instance of [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData), allowing for detailed and structured data transmission.
+* **request (object):** Submits a POST request to the dispatcher. This will be an object, allowing for detailed and structured data transmission.
 
 #### Make post request
 
@@ -59,8 +59,8 @@ The above post will trigger the result for the matching router:
 ```javascript
 // POST: example.se/#post/contact
 router.post('/post/contact', function(vars, request, path) {
-    const firstname = request.post.get("firstname");
-    const lastname = request.post.get("lastname");
+    const firstname = request.post.firstname;
+    const lastname = request.post.lastname;
     console.log(`The post request, first name: ${firstname}, last name: ${lastname}`);
 });
 ```
