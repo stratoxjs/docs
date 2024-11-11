@@ -3,6 +3,7 @@ description: >-
   As I have already mentioned in the first chapters you can install some
   plugins/pre-made components (ingress, table, and modals), more will certainly
   come.
+hidden: true
 ---
 
 # Plugins
