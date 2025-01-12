@@ -69,38 +69,33 @@ stratox.update("ingress", function(obj) {
 Below, I will show you some ways you can update view content **inside** of the view.
 
 ```javascript
-export function custom(data, container, helper, builder)
+export function custom({ props, view })
 {
-    const inst = this;
+    // Use the bind function to bind the event to click
+    const myClickEvent = view.bind((props) => {
+        props.headline = 'Headline has been updated!';
+    });
+    
+    /*
+    // Manually trigger update
+    const myClickEvent = view.bind((props) => {
+        props.headline = 'Headline has been updated!';
+        view.update();
+    }, false);
+    */
 
-    let out = `
+    return `
     <article>
         <section class="mb-30">
-            <h2 class="title">${data.headline}</h2>
-            <p>${data.content}</p>
+            <h2 class="title">${props.headline}</h2>
+            <p>${props.content}</p>
         </section>
-        <a id="my-view-btn" class="button" href="#">Update headline</a>
+        <a class="button" href="#" onclick="${myClickEvent}">Update headline</a>
     <article>
     `;
 
-    this.eventOnload(() => {
-        // Add Click event
-        const btn = document.getElementById("my-view-btn");
-        btn.addEventListener("click", function(e) {
-            e.preventDefault();
-            data.headline = "Headline updated";
-            inst.update();
-        });
-    });
-
     return out;
 }
-```
-
-When inside a component you only need to access the `this.update` function to update the component view.&#x20;
-
-```javascript
-this.update();
 ```
 
 #### Result:

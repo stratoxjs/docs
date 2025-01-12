@@ -14,10 +14,10 @@ A new container instance will be binded to each Stratox class instance. You can 
 #### 1. Inside component
 
 ```javascript
-export function custom(data, container, helper, builder)
+export function custom({ services })
 {
-    if (container.has("fallback")) {
-        container.get("fallback");
+    if (services.has("fallback")) {
+        services.get("fallback");
     }
     ...
 ```
@@ -26,7 +26,7 @@ export function custom(data, container, helper, builder)
 
 ```javascript
 const stratox = new Stratox("#ingress");
-const container = stratox.container();
+const serviceContainer = stratox.container();
 ```
 
 ### Container usage
@@ -35,92 +35,26 @@ Bellow is some quick example on different ways you can use the container.
 
 ```javascript
 // Example 1
-container.set("someObject", { test: "Container 1" });
+serviceContainer.set("someObject", { test: "Container 1" });
 
-console.log(container.get("someObject").test);
+console.log(serviceContainer.get("someObject").test);
 // Log response: Container 1
 
 // Example 2
-container.set("passingAFunction", function(arg1, arg2) {
+serviceContainer.set("passingAFunction", function(arg1, arg2) {
 	alert(arg1+" "+arg2);
 });
 
-container.get("passingAFunction", "Hello", "world!");
+serviceContainer.get("passingAFunction", "Hello", "world!");
 // Alert response: Hello world!
 ```
-
-### Working example
-
-Let's make a real working example to show to use `container` and why they will make your life way easier.
-
-#### 1. Create template
-
-```javascript
-export function custom(data, container, helper, builder)
-{
-    const inst = this;
-
-    let out = `
-    <article>
-        <section class="mb-30">
-            <h2 class="title">${data.headline}</h2>
-            <p>${data.content}</p>
-        </section>
-        <a id="my-view-btn" class="button" href="#">Update headline</a>
-    <article>
-    `;
-
-    this.eventOnload(() => {
-        // Add Click event
-        const btn = document.getElementById("my-view-btn");
-        btn.addEventListener("click", function(e) {
-            e.preventDefault();
-            
-            data.headline = "Headline updated";
-            inst.update();
-
-            // Let's use the container to create a fallback
-            if (container.has("fallback")) {
-                container.get("fallback");
-            }
-        });
-    });
-
-    return out;
-}
-```
-
-#### 2. Show the template
-
-Let's show the template and set the fallback container .
-
-```javascript
-let stratox = new Stratox("#app");
-
-stratox.view("custom", {
-    headline: "Lorem ipsum dolor",
-    content: "Lorem ipsum dolor sit amet",
-});
-
-stratox.execute();
-
-stratox.container().set("fallback", function () {
-    // Callback, modal has been confirmed
-    alert("The headline has been updated!");
-});
-
-```
-
-#### Result:
-
-{% embed url="https://codepen.io/wazabii8/pen/OJqgLWY" %}
 
 ### Stand alone
 
 You can also use the container in other projects.
 
 ```javascript
-import { StratoxContainer } from './node_modules/stratox/src/StratoxContainer.js';
+import { StratoxContainer } from 'stratox/StratoxContainer';
 const container = new StratoxContainer();
 ```
 

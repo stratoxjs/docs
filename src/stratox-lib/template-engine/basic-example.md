@@ -13,15 +13,14 @@ description: >-
 Create a template file named "ingress.js" and add the code below.
 
 ```javascript
-export function ingressComponent(data, container, helper, builder)
+export default function ingressComponent({ props })
 {
-    let out = `
+    return `
     <header class="mb-50 align-center">
-        <h1>${data.headline}</h1>
-        <p>${data.content}</p>
+        <h1>${props.headline}</h1>
+        <p>${props.content}</p>
     </header>
     `;
-    return out;
 }
 ```
 
@@ -30,13 +29,11 @@ export function ingressComponent(data, container, helper, builder)
 I will break down and explain the example in the next page.
 
 ```javascript
-import { ingressComponent } from './path/to/ingress.js';
+import ingressComponent from './path/to/ingress.js';
 
-Stratox.setComponent("ingress", ingressComponent);
+const stratox = new Stratox("#app");
 
-let stratox = new Stratox("#app");
-
-stratox.view("ingress", {
+stratox.view(ingressComponent, {
   headline: "Lorem ipsum dolor",
   content: "Lorem ipsum dolor sit amet"
 });
