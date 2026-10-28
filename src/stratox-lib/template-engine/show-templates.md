@@ -1,154 +1,203 @@
 ---
 description: >-
-  Stratox.js offers remarkable flexibility. You can use the same component view
-  multiple times in various locations and with varying content.
+  Show components on your page: one Stratox instance per element, several views in one element, the same component
+  more than once, inline components, and HTML without an element.
 ---
 
-# Show views
+# Showing views
 
-### How it works
+A view is a component with its data, shown in an element of your page. You make a Stratox instance for the element,
+add views to it, and call `execute()`.
 
-#### 1. Import
+## The element
 
-Let's start with importing a template view/component. I will begin with the easiest one: the ingress component.
+`new Stratox()` takes a CSS selector, an element, or a list of elements:
 
-```javascript
-import StratoxIngress from './path/to/view/StratoxIngress';
+```js
+import { Stratox } from 'stratox';
+
+Stratox.setComponent('Badge', ({ props, html }) => html`<span class="badge">${props.text}</span>`);
+
+const bySelector = new Stratox('#status');
+bySelector.view('Badge', { text: 'Open' });
+bySelector.execute();
+
+const byElement = new Stratox(document.getElementById('stock'));
+byElement.view('Badge', { text: 'In stock' });
+byElement.execute();
 ```
 
-#### 2. Initialize instance
-
-Create a class instance and pass a DOM element where you wish to show your template.
-
-```javascript
-const stratox = new Stratox("#app");
-```
-
-#### 3. Add view
-
-Now, add the view to the class instance and pass in the expected content object data to the view.
-
-```javascript
-stratox.view(StratoxIngress, {
-  headline: "Lorem ipsum dolor",
-  content: "Lorem ipsum dolor sit amet",
-});
-```
-
-#### 5. Execute
-
-Execute and display the views/components in the expected DOM element.
-
-```javascript
-stratox.execute();
-```
-
-#### 5. The HTML
-
-The HTML really just need a starting point but that depends completely on your need, building a app or enhancing a regular page.
-
+{% code title="Result" %}
 ```html
-<html>
-  <head>
-    <title>Example</title>
-    <meta charset="UTF-8" />
-  </head>
-  <body>
-      <div id="app"></div>
-  </body>
-</html>
+<div id="status">
+  <span class="badge">Open</span>
+</div>
+<div id="stock">
+  <span class="badge">In stock</span>
+</div>
+```
+{% endcode %}
+
+Stratox replaces the content of the element; the element itself stays. A page can have as many instances as it has
+elements to fill.
+
+## Several views in one element
+
+Views of one instance render in the order you add them:
+
+```js
+import { Stratox } from 'stratox';
+
+Stratox.setComponent('Heading', ({ props, html }) => html`<h2>${props.text}</h2>`);
+Stratox.setComponent('Paragraph', ({ props, html }) => html`<p>${props.text}</p>`);
+
+const article = new Stratox('#article');
+article.view('Heading', { text: 'Opening hours' });
+article.view('Paragraph', { text: 'Monday to Friday, 9 to 17.' });
+article.execute();
 ```
 
-#### 6. The result
+{% code title="Result" %}
+```html
+<div id="article">
+  <h2>Opening hours</h2>
+  <p>Monday to Friday, 9 to 17.</p>
+</div>
+```
+{% endcode %}
 
-{% embed url="https://codepen.io/wazabii8/pen/bGZgPNo" %}
+## The same component more than once
 
-### Combining multiple views
+Each view in an instance has a name, and a name is used once. To show one component several times, give each view
+its own key after a `#`:
 
-You can combine multiple views, both the same and different, in the same instance. Let's build upon the above example and add the ingress twice, combining them with a new table view:
+```js
+import { Stratox } from 'stratox';
 
-```javascript
-import StratoxIngress from './path/to/view/StratoxIngress';
-import StratoxTable from './path/to/view/StratoxTable';
+Stratox.setComponent('Product', ({ props, html }) => html`<h3>${props.title}</h3>`);
 
-let stratox = new Stratox("#app");
-
-// Add Ingress view: Welcome message
-stratox.view(StratoxIngress, {
-  headline: "Lorem ipsum dolor",
-  content: "Lorem ipsum dolor sit amet"
-});
-
-// Add table view A
-stratox.view({ tbViewA: StratoxTable }, {
-  feed: [
-    {
-      firstname: "John",
-      lastname: "Doe",
-      email: "john@gmail.com",
-      status: "1",
-    },
-    {
-      firstname: "Fredrik",
-      lastname: "Doe",
-      email: "fredrik@gmail.com",
-      status: "0",
-    },
-    {
-      firstname: "Dave",
-      lastname: "Doe",
-      email: "dave@gmail.com",
-      status: "1",
-    },
-  ]
-});
-
-// Add table view B
-stratox.view({ tbViewB: StratoxTable }, {
-  feed: [
-    {
-      firstname: "Jane",
-      lastname: "Doe",
-      email: "jane@gmail.com",
-      status: "1",
-    },
-    {
-      firstname: "Sophia",
-      lastname: "Doe",
-      email: "sophia@gmail.com",
-      status: "0",
-    },
-    {
-      firstname: "Ava",
-      lastname: "Doe",
-      email: "ava@gmail.com",
-      status: "1",
-    },
-  ]
-});
-
-stratox.execute();
+const products = new Stratox('#products');
+products.view('Product#lamp', { title: 'Desk lamp' });
+products.view('Product#chair', { title: 'Office chair' });
+products.execute();
 ```
 
-### Quick create and set component
+{% code title="Result" %}
+```html
+<div id="products">
+  <h3>Desk lamp</h3>
+  <h3>Office chair</h3>
+</div>
+```
+{% endcode %}
 
-Can also quick create and set component in one. The setComponent, argument 2 will also take a anonymous function like demonstrated below.
+## Showing a view again
 
-```javascript
+Calling `view()` again with the same name after `execute()` merges the new data into the view. It renders on the
+next `update()` or `execute()`:
 
-const stratox = new Stratox("#app");
-
-stratox.view(({ props }) => `
-    <header class="mb-50 align-center">
-        <h1>${props.headline}</h1>
-        <p>${props.content}</p>
-    </header>
-`, {
-  headline: "Lorem ipsum dolor",
-  content: "Lorem ipsum dolor sit amet"
-});
-
-stratox.execute();
+```js
+products.view('Product#lamp', { title: 'Desk lamp, white' });
+products.update();
 ```
 
-Now let's move on and take a look on how you can build custom templates.
+{% code title="Result" %}
+```html
+<div id="products">
+  <h3>Desk lamp, white</h3>
+  <h3>Office chair</h3>
+</div>
+```
+{% endcode %}
+
+With an imported component function, write the key as an object, `{ key: Component }`:
+
+{% code title="src/main.js" %}
+```js
+import { Stratox } from 'stratox';
+import Product from './components/product.js';
+
+const offers = new Stratox('#offers');
+offers.view({ lamp: Product }, { title: 'Desk lamp' });
+offers.view({ chair: Product }, { title: 'Office chair' });
+offers.execute();
+```
+{% endcode %}
+
+{% code title="src/components/product.js" %}
+```js
+export default function Product({ props, html }) {
+  return html`<h3>${props.title}</h3>`;
+}
+```
+{% endcode %}
+
+{% code title="Result" %}
+```html
+<div id="offers">
+  <h3>Desk lamp</h3>
+  <h3>Office chair</h3>
+</div>
+```
+{% endcode %}
+
+The views are named `Product#lamp` and `Product#chair`: that is the name you give `update()`.
+
+## Inline components
+
+A component can also be written right in the call. This suits small views:
+
+```js
+import { Stratox } from 'stratox';
+
+const notice = new Stratox('#notice');
+const item = notice.view(({ props, html }) => html`<p class="notice">${props.text}</p>`, {
+  text: 'We are closed on Friday.',
+});
+notice.execute();
+```
+
+{% code title="Result" %}
+```html
+<div id="notice">
+  <p class="notice">We are closed on Friday.</p>
+</div>
+```
+{% endcode %}
+
+An inline function has no name to update it by, so keep what `view()` returns. It is the view's item, and
+`item.update()` changes it:
+
+```js
+item.update({ text: 'We are open again on Monday.' });
+```
+
+{% code title="Result" %}
+```html
+<div id="notice">
+  <p class="notice">We are open again on Monday.</p>
+</div>
+```
+{% endcode %}
+
+## HTML without an element
+
+`execute()` returns the HTML it rendered. Without an element, that is all it does, so you can use Stratox to build
+HTML for something else:
+
+```js
+import { Stratox } from 'stratox';
+
+const mail = new Stratox();
+mail.view(({ props, html }) => html`<p>Hello ${props.name}, your order has shipped.</p>`, { name: 'Ada' });
+console.log(mail.execute());
+```
+
+{% code title="Result" %}
+```
+<p>Hello Ada, your order has shipped.</p>
+```
+{% endcode %}
+
+`execute()` returns `''` while components are still being loaded from the `directory` setting; then wait for
+`await view.ready()` and read `view.getResponse()`.
