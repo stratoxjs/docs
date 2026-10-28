@@ -19,7 +19,12 @@
 ## Form builder
 
 * [Form builder](form-builder/form-builder.md)
-* [Custom form template](form-builder/custom-form-template.md)
+* [Field types](form-builder/field-types.md)
+* [Repeaters](form-builder/repeaters.md)
+* [Forms from JSON](form-builder/forms-from-json.md)
+* [Components as fields](form-builder/components-as-fields.md)
+* [Custom form templates](form-builder/custom-form-template.md)
+* [Styling forms](form-builder/styling.md)
 
 ## Advanced features
 
