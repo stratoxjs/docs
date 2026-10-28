@@ -1,105 +1,198 @@
 ---
-description: You can update views inside of a component and outside.
+description: >-
+  Change a view's data and render it again: update() by name, with a callback or for every view, through the view's
+  item, or from inside the component. Updates change only what differs.
 ---
 
 # Updating views
 
-### Update view 1
+A view renders from its data. To change what it shows, change the data and render again. Stratox then changes only
+the parts of the page that differ.
 
-Below, I will show you some ways you can update view content outside of the view.
+The examples on this page use this component:
 
-```javascript
-let stratox = new Stratox("#app");
+```js
+import { Stratox } from 'stratox';
 
-const itemA = stratox.view("ingress#itemA", {
-    headline: "Lorem ipsum dolor 1",
-    content: "Lorem ipsum dolor sit amet",
-});
+Stratox.setComponent('Order', ({ props, html }) => html`
+  <p>Order ${props.id}: ${props.status}</p>
+`);
 
-const itemB = stratox.view("ingress#itemB", {
-    headline: "Lorem ipsum dolor 2",
-    content: "Lorem ipsum dolor sit amet",
-});
-
-stratox.execute();
-
-const myBtn = document.getElementById("update-headline-btn");
-myBtn.addEventListener("click", function (e) {
-    e.preventDefault();
-    itemA.set({ headline: "Headline 1 been updated!" }).update();
-    itemB.set({ headline: "Headline 2 been updated!" }).update();
-});
+const orders = new Stratox('#orders');
+const first = orders.view('Order#first', { id: 101, status: 'received' });
+orders.view('Order#second', { id: 102, status: 'received' });
+orders.execute();
 ```
 
-#### Result:
+{% code title="Result" %}
+```html
+<div id="orders">
+  <p>Order 101: received</p>
+  <p>Order 102: received</p>
+</div>
+```
+{% endcode %}
 
-{% embed url="https://codepen.io/wazabii8/pen/gOEgNrW" %}
+## update() by name
 
-#### Update example 1
+`update(name, data)` merges the data into the view with that name and renders:
 
-The above example is utilizing the components item variable to tell Stratox which component you want to update, e.g.:
-
-```javascript
-itemA.set({ headline: "Headline 1 been updated!" }).update();
+```js
+orders.update('Order#second', { status: 'packed' });
 ```
 
-There are tho 2 other ways you can also update the component with.
-
-#### Update example 2
-
-Utilize the view component setter again, but with updated values, and trigger the `stratox.update()` function to push changes to the view.
-
-```javascript
-stratox.view("ingress", { headline: "Headline been twice!" });
-stratox.update();
+{% code title="Result" %}
+```html
+<div id="orders">
+  <p>Order 101: received</p>
+  <p>Order 102: packed</p>
+</div>
 ```
+{% endcode %}
 
-#### Update example 3
+A view added without a key, such as `view('Order', ...)`, is updated by its plain name: `update('Order', data)`.
 
-Utilize the `stratox.update()` function and set argument 1 to the expected component name and argument 2 to an anonymous function. The anonymous function, in turn, has one expected object argument where you can access the component's data and modify it.
+## update() with a callback
 
-```javascript
-stratox.update("ingress", function(obj) {
-    obj.data.headline = "Headline updated thrice!";
+Give a callback instead of data to change the data yourself. It gets the view's data and its item:
+
+```js
+orders.update('Order#first', (data) => {
+  data.status = `${data.status}, paid`;
 });
 ```
 
-### Update view 2
+{% code title="Result" %}
+```html
+<div id="orders">
+  <p>Order 101: received, paid</p>
+  <p>Order 102: packed</p>
+</div>
+```
+{% endcode %}
 
-Below, I will show you some ways you can update view content **inside** of the view.
+Without a name, the callback runs once for every view of the instance, then everything renders once:
 
-```javascript
-export function custom({ props, view })
-{
-    // Use the bind function to bind the event to click
-    const myClickEvent = view.bind((props) => {
-        props.headline = 'Headline has been updated!';
-    });
-    
-    /*
-    // Manually trigger update
-    const myClickEvent = view.bind((props) => {
-        props.headline = 'Headline has been updated!';
-        view.update();
-    }, false);
-    */
-
-    return `
-    <article>
-        <section class="mb-30">
-            <h2 class="title">${props.headline}</h2>
-            <p>${props.content}</p>
-        </section>
-        <a class="button" href="#" onclick="${myClickEvent}">Update headline</a>
-    <article>
-    `;
-
-    return out;
-}
+```js
+orders.update((data) => {
+  data.status = 'shipped';
+});
 ```
 
-#### Result:
+{% code title="Result" %}
+```html
+<div id="orders">
+  <p>Order 101: shipped</p>
+  <p>Order 102: shipped</p>
+</div>
+```
+{% endcode %}
 
-{% embed url="https://codepen.io/wazabii8/pen/OJqgLWY" %}
+`orders.updateAll(callback)` does the same. `updateAll(callback, false)` changes the data without rendering, for
+when you render later yourself.
 
-And that is that. Let's move on on how you can build to some forms
+## Through the view's item
+
+`view()` returns the view's item. Its `update()` changes that view, without a name:
+
+```js
+first.update({ status: 'delivered' });
+```
+
+{% code title="Result" %}
+```html
+<div id="orders">
+  <p>Order 101: delivered</p>
+  <p>Order 102: shipped</p>
+</div>
+```
+{% endcode %}
+
+`item.set(data)` merges data without rendering, and returns the item, so `first.set({ status: 'returned' }).update()`
+does both.
+
+## Render again as it is
+
+`update()` without arguments renders every view of the instance again, for example after you changed the data
+objects yourself:
+
+```js
+first.data.status = 'returned';
+orders.update();
+```
+
+{% code title="Result" %}
+```html
+<div id="orders">
+  <p>Order 101: returned</p>
+  <p>Order 102: shipped</p>
+</div>
+```
+{% endcode %}
+
+## From inside the component
+
+A component gets `update` in its object. `update(data)` merges into its own data and renders; `update(name, data)`
+works like the instance's `update()`. Updates from events are on the [Events](../events.md) page.
+
+## Before execute()
+
+`update()` before `execute()` only changes the data. The first `execute()` renders it:
+
+```js
+const queue = new Stratox('#queue');
+queue.view('Order', { id: 103, status: 'received' });
+queue.update('Order', { status: 'on hold' });
+queue.execute();
+```
+
+{% code title="Result" %}
+```html
+<div id="queue">
+  <p>Order 103: on hold</p>
+</div>
+```
+{% endcode %}
+
+## Updates change the page in place
+
+When a view renders again, Stratox compares the new HTML with the page and changes only what differs. Elements that
+stay keep their state: focus, the cursor and typed text in a field, scroll positions, and listeners you added to them.
+
+This is the `morph` setting, on by default. With `Stratox.setConfigs({ morph: false })`, every render replaces the
+whole content of the element instead, as Stratox 3 did.
+
+## After each render
+
+`view.done(callback)` is called after the first render with `'load'` as its third argument, and after every later
+render with `'update'`. `this` is the view:
+
+```js
+const log = new Stratox('#log');
+log.view('Order', { id: 104, status: 'received' });
+log.done((context, observer, reason) => {
+  console.log(`rendered: ${reason}`);
+});
+log.execute();
+```
+
+{% code title="Result" %}
+```
+rendered: load
+```
+{% endcode %}
+
+Later, an update:
+
+```js
+log.update('Order', { status: 'packed' });
+```
+
+{% code title="Result" %}
+```
+rendered: update
+```
+{% endcode %}
+
+The first render calls `done` on a timer, after `execute()` has returned. To work with the rendered elements, use
+`view.getElement()`, which returns the instance's elements.
