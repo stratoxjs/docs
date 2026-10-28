@@ -1,15 +1,18 @@
 # Table of contents
 
-* [Stratox.js - Template engine](README.md)
+* [Introduction](README.md)
+
+## Getting started
+
 * [Installation](installation.md)
+* [Quick start](template-engine/basic-example.md)
+* [Upgrading from 3.x](upgrading.md)
 
 ## Template engine
 
-* [Basic example](template-engine/basic-example.md)
 * [Show views](template-engine/show-templates.md)
 * [Create views](template-engine/create-templates.md)
 * [Updating views](template-engine/updating-views.md)
-* [Plugins](template-engine/plugins.md)
 
 ## Form builder
 
