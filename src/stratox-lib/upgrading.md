@@ -325,7 +325,7 @@ These are fixes, but a page that relied on the old output may look different:
 
 ## 11. Other fixes you may notice
 
-* `view(name, data)` again after `execute()` updates that view with the new data.
+* `view(name, data)` again after `execute()` merges the new data into that view; the next `update()` renders it.
 * `update()` and `updateAll()` before `execute()` change the data; the first `execute()` renders it.
 * `update(name, data)` also finds form items by name, and a numeric view key works.
 * `new Stratox(element)` and `setElement(element)` take a DOM element or a list of elements, not only a selector.

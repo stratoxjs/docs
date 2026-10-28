@@ -8,11 +8,13 @@
 * [Quick start](template-engine/basic-example.md)
 * [Upgrading from 3.x](upgrading.md)
 
-## Template engine
+## Components and views
 
-* [Show views](template-engine/show-templates.md)
-* [Create views](template-engine/create-templates.md)
+* [Components](template-engine/create-templates.md)
+* [Showing views](template-engine/show-templates.md)
 * [Updating views](template-engine/updating-views.md)
+* [Events](events.md)
+* [Safe markup](safe-markup.md)
 
 ## Form builder
 
