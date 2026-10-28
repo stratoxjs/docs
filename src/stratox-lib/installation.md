@@ -127,15 +127,4 @@ Stratox.setConfigs({
 });
 ```
 
-| Setting | Default | What it does |
-| --- | --- | --- |
-| `handlers.fields` | `null` | The form field class. `StratoxTemplate` gives the built-in field types; extend it for your own. |
-| `handlers.helper` | a function | A value given to every component as `helper`. A function is called with the form builder, and its result is given. |
-| `directory` | `''` | A folder that components which are not registered are imported from. |
-| `cache` | `false` | With `false`, imports from `directory` get a query string, so the browser loads the files again on each page load. |
-| `morph` | `true` | Updates change only what differs. With `false`, every update replaces the whole content of the element. |
-| `classes` | `{}` | Layout classes for the form builder. |
-| `icons` | `{}` | Icons for the form builder's add and remove buttons. |
-| `propagation` | `true` | Renders that follow right after each other are written to the page on a timer, once. |
-
-`handlers`, `classes` and `icons` are merged with what is already set, so you change one key at a time.
+Every setting, with its default and examples, is on the [Configuration](configuration.md) page.

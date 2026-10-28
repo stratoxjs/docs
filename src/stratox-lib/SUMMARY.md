@@ -14,6 +14,8 @@
 * [Showing views](template-engine/show-templates.md)
 * [Updating views](template-engine/updating-views.md)
 * [Events](events.md)
+* [Partials and blocks](partials-and-blocks.md)
+* [Components on demand](components-on-demand.md)
 * [Safe markup](safe-markup.md)
 
 ## Form builder
@@ -26,9 +28,14 @@
 * [Custom form templates](form-builder/custom-form-template.md)
 * [Styling forms](form-builder/styling.md)
 
-## Advanced features
+## Apps and services
 
-* [Container](advanced-features/container.md)
+* [Configuration](configuration.md)
+* [Apps on one page](apps.md)
+* [Services](advanced-features/container.md)
+
+## Reference
+
 * [Template view functions](advanced-features/template-view-functions.md)
 
 ***
