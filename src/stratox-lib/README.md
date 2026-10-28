@@ -1,46 +1,191 @@
 ---
 description: >-
-  Stratox.js is a user-friendly JavaScript template engine that helps you easily
-  build template components and views.
+  Stratox is a tiny JavaScript library that makes any website dynamic: components, live updates and a complete
+  form builder for the pages you already have.
 ---
 
-# Stratox.js - Template engine
+# Introduction
 
-The Stratox template library is created using up-to-date methods, keeping its size at around 6 kb when bundled and minimized (gzipped). It works independently, smoothly running on all platforms without needing anything else. Stratox.js is a smart pick for applications and websites, ensuring great performance and quick load time. It's versatile, letting you load views asynchronously (with optional caching) or bundle them conveniently into your main JavaScript file.
+**Make any website dynamic. Build complex forms in minutes.**
 
-### [Startox framework](https://stratox.wazabii.se/)
+Stratox is a tiny JavaScript library that brings components, live updates and a complete form builder to the sites
+you already have. Keep your backend, your HTML and your CSS: point Stratox at an element, and that part of the page
+comes alive.
 
-This is the Startox template engine library. If your looking for the framework, that is fully installable with controllers, routers, template engine, components and design system then [click here](https://stratox.wazabii.se/).
+```bash
+npm install stratox
+```
 
-### User-Friendly
+## Why Stratox
 
-Stratox is very user-friendly because it lets you prioritize JavaScript and HTML instead of grappling with the complexities of new markup and platform-specific functions, which in the end only lead to the burden of unnecessary abstractions. Stratox harnesses JavaScript's core capabilities, promoting a practical and fundamental approach to modern web development.
+* **A form builder that does the hard part.** Repeating rows, rows inside rows, selects, radios, checkboxes and your
+  own field types. Describe the form in a few lines, or send it from the server as JSON. Stratox renders it, keeps
+  every value in sync, and names every input so your backend receives clean, nested data.
+* **Dynamic, without a rewrite.** No single-page app, no takeover. Stratox only fills the elements you give it, so a
+  PHP, Python, Ruby, .NET or CMS page stays exactly what it is, with interactive parts where you want them.
+* **Tiny.** About 9 kB minified and gzipped, form builder included. Zero dependencies.
+* **Easy.** A component is a function that returns HTML. If you can write a template string, you can write Stratox.
+* **Safe by default.** Every value you put into markup is escaped, so data from users and servers cannot inject HTML.
+* **Smooth updates.** On every change Stratox updates only what differs, so focus, the cursor and typed text stay
+  where they are.
+* **TypeScript included.** Written in TypeScript, with types for components, props and forms.
 
-### Platform-agnostic nature
+## Forms in minutes
 
-Stratox.js doesn't discriminate or judge based on the platform you use, and it works seamlessly on all platforms and depends on nothing but it self.
+Your page has a form with an empty element in it:
 
-### Full accessibility support
+```html
+<form method="post" action="/events">
+  <div id="event-form"></div>
+  <button type="submit">Save</button>
+</form>
+```
 
-Moreover, by allowing developers to write regular HTML with the right semantics, Stratox.js ensures that the resulting interfaces are fully **accessible**. This dual emphasis on simplicity and accessibility makes Stratox.js a powerful tool for creating user-friendly and inclusive web applications.
+Stratox fills it:
 
-### Why Stratox.js?
+```js
+import { Stratox, StratoxTemplate } from 'stratox';
 
-* **High Performance:** Stratox.js is optimized for performance.
-* **Great Load Speed:** Experience swift loading times for a seamless user experience.
-* **Optimized:** A finely-tuned library that prioritizes efficiency.
-* **User-Friendly:** Easy to use, making development a breeze.
-* **Platform-Agnostic:** Works seamlessly across all platforms.
-* **Template Engine:** Facilitates the creation of Views, components, and UI elements.
-* **Form Builder:** Follows HTML semantics, supporting nested form names.
-* **HTML Semantics:** Follow HTML semantics if you wish
-* **Full Accessibility Support:** You can make your app inclusive and accessible for all.
-* **Container Library:** Designed for seamless communication between template views and your project.
-* **Async and bundle:** Support asynchronous loading of or bundling of views
+// Turn on the built-in field types
+Stratox.setConfigs({ handlers: { fields: StratoxTemplate } });
 
-### Targeting
+const form = new Stratox('#event-form');
 
-* **Single-Page Application (SPA):** Ideal for creating SPAs with enhanced user experiences.
-* **Cross-Platform Compatibility:** Apache Cordova (PhoneGap), Xamarin, Electron, Ionic, and similar.
-* **Enhancing Static HTML:** Easily integrates with existing static HTML structures.
-* **Backend Language Integration:** Communicates seamlessly with various backend languages.
+form.form('name').setLabel('Event name');
+form.form('category', {
+  type: 'select',
+  label: 'Category',
+  items: { tech: 'Technology', design: 'Design' },
+});
+
+// Sessions the user can add and remove, each with speakers they can add and remove
+form.form('sessions', { type: 'group', label: 'Sessions' })
+  .setConfig({ nestedNames: true, controls: true })
+  .setFields({
+    title: { type: 'text', label: 'Session title' },
+    speakers: {
+      type: 'group',
+      label: 'Speakers',
+      config: { nestedNames: true, controls: true },
+      fields: { name: { type: 'text', label: 'Speaker' } },
+    },
+  });
+
+// Saved answers fill the form, rows included
+form.setValues({
+  name: 'Static Sites Day',
+  category: 'tech',
+  sessions: [{ title: 'Forms from JSON', speakers: [{ name: 'Ada' }, { name: 'Linus' }] }],
+});
+
+form.execute();
+```
+
+That is the whole form: labels, inputs, and buttons to add and remove rows at both levels. It submits like any other
+form, and every input already has the name your backend needs:
+
+{% code title="Result: what the form posts" %}
+```
+name = Static Sites Day
+category = tech
+sessions[0][title] = Forms from JSON
+sessions[0][speakers][0][name] = Ada
+sessions[0][speakers][1][name] = Linus
+```
+{% endcode %}
+
+PHP, for example, reads it as nested arrays: `$_POST['sessions'][0]['speakers'][1]['name']` is `"Linus"`.
+
+`form.getValues()` gives you the same answers as data at any moment, kept up to date while the user types and adds
+or removes rows:
+
+```js
+console.log(form.getValues());
+```
+
+{% code title="Result" %}
+```json
+{
+  "name": "Static Sites Day",
+  "category": "tech",
+  "sessions": [
+    {
+      "title": "Forms from JSON",
+      "speakers": [{ "name": "Ada" }, { "name": "Linus" }]
+    }
+  ]
+}
+```
+{% endcode %}
+
+Every field is plain data, so a whole form can also come from your database as JSON. The [form
+builder](form-builder/form-builder.md) section shows it all.
+
+## Make a static page dynamic
+
+Your page stays server-rendered. Stratox takes over one element:
+
+```html
+<h1>Our products</h1>
+<p>Everything here is plain HTML from your server.</p>
+
+<div id="cart"></div>
+```
+
+```js
+import { Stratox } from 'stratox';
+
+Stratox.setComponent('Cart', ({ props, view, html }) => html`
+  <p>Items in your cart: ${props.items}</p>
+  <button type="button" ${view.on('click', (data) => { data.items += 1; })}>Add to cart</button>
+`);
+
+const cart = new Stratox('#cart');
+cart.view('Cart', { items: 0 });
+cart.execute();
+```
+
+{% code title="Result" %}
+```html
+<div id="cart">
+  <p>Items in your cart: 0</p>
+  <button type="button" data-stratox-click="1">Add to cart</button>
+</div>
+```
+{% endcode %}
+
+Click the button and the cart renders again:
+
+{% code title="Result after a click" %}
+```html
+<div id="cart">
+  <p>Items in your cart: 1</p>
+  <button type="button" data-stratox-click="2">Add to cart</button>
+</div>
+```
+{% endcode %}
+
+Change it from anywhere else in your script:
+
+```js
+cart.update('Cart', { items: 5 });
+```
+
+{% code title="Result" %}
+```html
+<div id="cart">
+  <p>Items in your cart: 5</p>
+  <button type="button" data-stratox-click="3">Add to cart</button>
+</div>
+```
+{% endcode %}
+
+Add as many of these islands to one page as you like.
+
+## Where to go next
+
+* [Installation](installation.md): npm with a bundler, or a CDN for a page without a build.
+* [Quick start](template-engine/basic-example.md): your first component, step by step.
+* [Upgrading from 3.x](upgrading.md): what changed in Stratox 4.
+* Need routing? [Stratox Pilot](https://stratox.wazabii.se/stratox-router) is the router made for Stratox: it maps
+  URLs to components and changes pages without a reload. About 4 kB more.
