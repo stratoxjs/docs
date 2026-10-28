@@ -153,10 +153,21 @@ console.log(profile.getValues());
 ```
 {% endcode %}
 
-In a form with a [repeater](repeaters.md), Stratox writes every change into this object while the user types, checks
-and adds or removes rows, so `getValues()` always gives the current answers, ready for
-`JSON.stringify()`. In a form without a repeater, it keeps the values you set; read what the user typed from the
-form itself, for example with `new FormData(form)`.
+Stratox writes every change into this object while the user types, checks, selects, and adds or removes
+[repeater](repeaters.md) rows, so `getValues()` always gives the current answers, ready for `JSON.stringify()`.
+After the user changes the name to Ada King and unchecks the newsletter, the same call gives:
+
+{% code title="Result after typing" %}
+```json
+{ "name": "Ada King", "newsletter": 0 }
+```
+{% endcode %}
+
+* A checkbox with one item gives its value when checked and `0` when not; one with several items, and a `select`
+  with `multiple`, give an array of the chosen values.
+* A form inside another form's element keeps its own values: each form takes only the fields in its own element.
+* A form that has no element, whose HTML from `execute()` you insert yourself, follows the user only when it has a
+  repeater.
 
 To show new values after `execute()`, call `setValues()` again and render with `update()`:
 

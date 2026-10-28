@@ -86,7 +86,7 @@ Every key of a field works in JSON: `type`, `label`, `description`, `attr`, `con
 
 ## The answers back as JSON
 
-The values object follows the user in a form with a repeater, so sending the answers back is one line. After the
+The values object follows the user, so sending the answers back is one line. After the
 user changes the first session's title to "Forms from data":
 
 ```js
