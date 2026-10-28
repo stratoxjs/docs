@@ -1,0 +1,3 @@
+# Old page paths that now redirect (D-062, decision 5)
+redirects:
+  template-engine/plugins: README.md
