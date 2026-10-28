@@ -1,230 +1,152 @@
 ---
-description: Create a custom form template
+description: >-
+  Add field types to the Stratox form builder, or change the built-in ones, with a class that extends
+  StratoxTemplate. The helpers and properties a field method can use.
 ---
 
-# Custom form template
+# Custom form templates
 
-### Create form template file
+Each field type is a method of the form handler class. `StratoxTemplate` has the built-in ones. Extend it, and a new
+method is a new field type; a method with a built-in name replaces that type.
 
-The new form field template class needs to extend to StratoxTemplate.
+## Add a field type
 
-```javascript
-import { StratoxTemplate } from '../node_modules/stratox/src/StratoxTemplate.js';
+```js
+import { Stratox, StratoxTemplate } from 'stratox';
 
-export class FormTemplateFields extends StratoxTemplate {
-    
-    /**
-     * Regular input field
-     * @return {string}
-     */
-    text() {
-        let inst = this;
-        return this.container(function() {
-            return inst.input();
-        });
-    }
-
-    /**
-     * Regular input field
-     * @return {string}
-     */
-    text(arg) {
-        let inst = this;
-        return this.container(function() {
-            return inst.input();
-        });
-    }
-
-    /**
-     * Password input field
-     * @return {string}
-     */
-    password() {
-        let inst = this;
-        return this.container(function() {
-            let out =  inst.input({ type: "password" });
-            return out;
-        });
-    }
-
-    /**
-     * Date input field
-     * @return {string}
-     */
-    date() {
-        let inst = this;
-        return this.container(function() {
-            return inst.input({ type: "date" });
-        });
-    }
-
-    /**
-     * Date time input field
-     * @return {string}
-     */
-    datetime() {
-        let inst = this;
-        return this.container(function() {
-            return inst.input({ type: "datetime-local" });
-        });
-    }
-
-    /**
-     * Hidden input field
-     * @return {string}
-     */
-    hidden() {
-        let inst = this;
-        return inst.input({ type: "hidden" });
-    }
-
-    /**
-     * Textarea field
-     * @return {string}
-     */
-    textarea() {
-        let inst = this, attr = this.getAttr({
-            name: this.name,
-            "data-index": this.index
-        });
-        
-        return this.container(function() {
-            return '<textarea'+attr+'>'+inst.value+'</textarea>';
-        }); 
-    }
-    
-    /**
-     * Select field
-     * @return {string}
-     */
-    select() {
-        let inst = this, attrName = ((this.attr && this.attr.multiple) ? this.name+"[]" : this.name), 
-        attr = this.getAttr({
-            name: attrName,
-            "data-index": this.index
-        });
-
-        return this.container(function() {
-            let out = '<select'+attr+' autocomplete="off">';
-            if(typeof inst.data.items === "object") {
-                for(const [value, name] of Object.entries(inst.data.items)) {
-                    let selected  = (inst.isChecked(value))  ? ' selected="selected"' : "";
-                    out += '<option value="'+value+'"'+selected+'>'+name+'</option>';
-                }
-            } else {
-                console.warn("Object items parameter is missing.");
-            }
-            out += '</select>';
-            return out;
-        });
-    }
-
-    /**
-     * Radio input field
-     * @return {string}
-     */
-    radio() {
-        let inst = this, attr = this.getAttr({
-            type: "radio",
-            name: this.name,
-            "data-index": this.index
-        });
-
-        return this.container(function() {
-            let out = '';
-            if(typeof inst.data.items === "object") {
-                for(const [value, name] of Object.entries(inst.data.items)) {
-                    let checked  = (inst.isChecked(value))  ? ' checked="checked"' : "";
-                    out += '<label class="radio item small"><input'+attr+' value="'+value+'"'+checked+'><span class="title">'+name+'</span></label>';
-                }
-            } else {
-                console.warn("Object items parameter is missing.");
-            }
-            return out;
-        });
-    }
-
-    /**
-     * Checkbox input field
-     * @return {string}
-     */
-    checkbox() {
-        let inst = this, length = Object.keys(inst.data.items).length, attr = this.getAttr({
-            type: "checkbox",
-            name: ((length > 1) ? this.name+"[]" : this.name),
-            "data-index": this.index
-        });
-
-        return this.container(function() {
-            let out = '';
-            if(typeof inst.data.items === "object") {
-                for(const [value, name] of Object.entries(inst.data.items)) {
-                    let checked  = (inst.isChecked(value))  ? ' checked="checked"' : "";
-                    out += '<label class="checkbox item small"><input'+attr+' value="'+value+'"'+checked+'><span class="title">'+name+'</span></label>';
-                }
-            } else {
-                console.warn("Object items parameter is missing.");
-            }
-            return out;
-        });
-    }
-
+class MyFields extends StratoxTemplate {
+  rating(helper) {
+    return this.container(() => this.input(helper, { type: 'range', min: 1, max: 5 }));
+  }
 }
+
+Stratox.setConfigs({ handlers: { fields: MyFields } });
+
+const review = new Stratox('#review');
+review.form('score', { type: 'rating', label: 'Your rating', value: 3 });
+review.execute();
 ```
 
-### Break down
+{% code title="Result" %}
+```html
+<div id="review">
+  <div id="wa-fi-view-0" data-index="0" class="mb-15 field-score w-full">
+    <label>Your rating<div class="message hide"></div></label>
+    <input type="range" name="score" value="3" data-index="0" min="1" max="5" data-name="score">
+  </div>
+</div>
+```
+{% endcode %}
 
-To make a quick breakdown of the above: the functions `container` , `input` and `getAttr` are  helper function, to make it easier for you create an input container that also holds a field label and input, creating the input tag fields or generate HTML attributes. They are not required, and you could just write your own HTML code and return that string, and it will work.
+* `this` in a field method is the form builder, holding the field being rendered.
+* `container(callback)` writes the field's `<div>`, label and description around what the callback returns.
+* `input(helper, attributes)` writes an `<input>` with the field's name, value and attributes; yours are added on
+  top.
+* A field method returns an HTML string. Escape every value you write yourself with `this.escapeHtml()`, or use
+  `getAttr()`, which escapes.
 
-But to make it easier for you to understand let's take a look on how the **textarea** is build:
+## Change a built-in type
 
-```javascript
-textarea() {
-    let inst = this, attr = this.getAttr({
-        name: this.name,
-        "data-index": this.index
-    });
-    
-    return this.container(function() {
-        return '<textarea'+attr+'>'+inst.value+'</textarea>';
-    }); 
+Override the method. This submit field renders a `<button>` instead of an `<input>`:
+
+```js
+class ButtonFields extends StratoxTemplate {
+  submit() {
+    return `<div class="actions"><button type="submit"${this.getAttr({ name: this.name })}>${this.escapeHtml(this.value)}</button></div>`;
+  }
 }
+
+const app = Stratox.createApp({ handlers: { fields: ButtonFields } });
+const actions = new Stratox('#actions', app);
+actions.form('save', { type: 'submit', value: 'Save changes' });
+actions.execute();
 ```
 
-#### Helper functions:&#x20;
+{% code title="Result" %}
+```html
+<div id="actions">
+  <div class="actions">
+    <button type="submit" name="save" data-name="save">Save changes</button>
+  </div>
+</div>
+```
+{% endcode %}
 
-Bellow is a list on helper functions that you can use in your form field template.
+The example uses an app of its own, so its field types apply to its own forms only; see the `handlers` setting on
+[Installation](../installation.md).
 
-* **getAttr:** It will **merge** specified attributes in the form builder with **default** attributes above, which we will then just add to the **textarea**. It is recommended that you use this function, with at least the name attribute, as shown in the example.
-* **container:** Will create input container that holds a label and description for your.
-* **input:** Will create input tag fields or generate HTML attributes.
-* **isChecked:** Will check if items like radio, checkboxes and select lists is active.
-* **getFieldID:** Will get a unique identifier that you can use as a element ID. E.G. the container function will automatically do this for you.
+## What a field method can use
 
-#### Accessible objects:
+| Property | What it is |
+| --- | --- |
+| `this.name` | The input's name, with the row path in a repeater: `members[0][name]`. |
+| `this.nameJoin` | The same path with commas, `members,0,name`. Written to `data-name`, which lets Stratox track the value. |
+| `this.value` | The value, from `setValues()` or the field's own `value`. Text. |
+| `this.label`, `this.description` | The texts. HTML. |
+| `this.attr` | The field's `attr`. |
+| `this.conAttr` | The container's attributes. |
+| `this.config` | The field's `config`: free for your own settings. |
+| `this.data` | The whole definition, also `this.data.items`. |
+| `this.index` | The field's position in the form. |
+| `this.view` | The Stratox instance. |
 
-Bellow is a list on object that you can use in your form field template.
+| Method | What it does |
+| --- | --- |
+| `container(callback)` | The field's container with label and description around the callback's markup. |
+| `input(helper, attributes)` | An `<input>` with name, value, `data-name` and the field's `attr`. |
+| `getAttr(defaults)` | The defaults merged with the field's `attr` (which wins), as an attribute string, escaped. |
+| `getAttrStr(object)` | Any object as an attribute string, escaped. `true` writes a bare attribute, `false` leaves it out. |
+| `escapeHtml(value)` | The value escaped for text or an attribute. |
+| `isChecked(value)` | Whether an option is the value, or in it when the value is an array. Compared as text. |
+| `getFieldID()` | An id for the field, the one `container()` uses. |
+| `getClass(key)`, `classList(...classes)` | The layout classes from the `classes` setting; see [Styling forms](styling.md). |
 
-* **label:** Will return the expected form field label
-* **description:** Will return a form field description you can use if you want
-* **attr:** Will return all expected form field attributes as object (recommended tho that you utilize getAttr function)
-* **items:** Will return the expected form field items (radio, checkboxes, and list in select lists).
-* **name:** Will return the expected form field attribute name
-* **value:** Will return the expected form field value
-* **config:** Will return the expected form field custom configs that is passable
+The `helper` argument is what the `handlers.helper` setting gives, the same as a component's `helper`.
 
-### Initialize the new template
+{% hint style="info" %}
+One builder renders every field of a form, one after the other. Read `this` while the method runs; do not keep it
+for later.
+{% endhint %}
 
-You can now tell Stratox which form template file which is expected in the configuration.
+## Start from nothing
 
-<pre class="language-javascript"><code class="lang-javascript"><strong>import { FormTemplateFields } from './src/FormTemplateFields.js';
-</strong><strong>
-</strong>Stratox.setConfigs({
-    handlers: {
-    	fields: FormTemplateFields
-    }
-});
-<strong>
-</strong></code></pre>
+Extend `StratoxBuilder` instead to have no built-in types at all, only yours. A form handler must be
+`StratoxBuilder` or a class that extends it:
 
-Done you can now use your own form template!
+```js
+import { StratoxBuilder } from 'stratox';
+
+class OnlyText extends StratoxBuilder {
+  text() {
+    return `<p><input type="text"${this.getAttr({ name: this.name, value: this.value })}></p>`;
+  }
+}
+
+const minimal = new Stratox('#minimal', Stratox.createApp({ handlers: { fields: OnlyText } }));
+minimal.form('city').setValue('Malmö');
+minimal.execute();
+```
+
+{% code title="Result" %}
+```html
+<div id="minimal">
+  <p><input type="text" name="city" value="Malmö" data-name="city"></p>
+</div>
+```
+{% endcode %}
+
+## TypeScript
+
+The class and its methods are typed, so `this` in a field method knows the builder:
+
+```ts
+import { Stratox, StratoxTemplate } from 'stratox';
+
+class TypedFields extends StratoxTemplate {
+  rating(helper: unknown): string {
+    return this.container(() => this.input(helper, { type: 'range', min: 1, max: 5 }));
+  }
+}
+
+Stratox.setConfigs({ handlers: { fields: TypedFields } });
+```
