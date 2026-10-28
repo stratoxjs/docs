@@ -233,8 +233,8 @@ To get the 3.x behaviour back: `Stratox.setConfigs({ morph: false })`.
 ## 8. Events
 
 New: `view.on(eventName, fn)` returns an attribute to write inside a tag. It needs no inline JavaScript, so it works
-with a strict Content Security Policy. The callback is the same as `bind()`'s, and it does not call
-`preventDefault()`.
+with a strict Content Security Policy. The callback gets the same arguments as `bind()`'s, but only for the
+component that wrote the attribute, not for every view of the instance, and it does not call `preventDefault()`.
 
 ```js
 import { Stratox } from 'stratox';
