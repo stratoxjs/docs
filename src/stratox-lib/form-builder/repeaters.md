@@ -94,8 +94,8 @@ Your backend receives the rows as a nested list. PHP, for example, reads `$_POST
 
 ## The values follow the user
 
-In a form with a repeater, Stratox writes every change into the values object: typing, checking, adding and removing
-rows. `getValues()` is always the current state. `team.getValues()` after the user types "Linus" over the second
+Stratox writes every change into the values object: typing, checking, adding and removing rows. `getValues()` is
+always the current state. `team.getValues()` after the user types "Linus" over the second
 name:
 
 {% code title="Result after typing" %}

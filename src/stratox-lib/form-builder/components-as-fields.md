@@ -69,7 +69,7 @@ hints.execute();
 A component can also be the input. The builder knows the field's name and value: `context.name` is the input's
 name (with the row path in a repeater), `context.value` its value, and `context.isChecked(value)` tells if an option
 matches the value. Write `context.nameJoin` into `data-name`, and Stratox keeps `getValues()` up to date when the
-user changes the field in a form with a repeater:
+user changes the field:
 
 ```js
 Stratox.setComponent('Stars', ({ props, context, html }) => html`
