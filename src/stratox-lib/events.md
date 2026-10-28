@@ -33,7 +33,7 @@ likes.execute();
 ```
 {% endcode %}
 
-* The callback gets `(props, view, item, event)`, and `this` is the view.
+* The callback gets `(props, view, item, event)` of the component that wrote the attribute, and `this` is the view.
 * Any event works whose name is in lowercase letters: `click`, `input`, `change`, `submit`, `keydown`, `focus` and
   so on.
 * The default action is not prevented. Call `event.preventDefault()` in the callback when you need to, for example
@@ -82,24 +82,15 @@ After typing `m` in the field:
 
 ## Several views in one instance
 
-{% hint style="warning" %}
-The callback of `on()` and `bind()` runs once for **every** view of the instance, each time with that view's data
-and item. With one view per instance it runs once.
-{% endhint %}
-
-The simplest way to keep events apart is one view per instance, each with its own element. When views share an
-instance, change only the data that is the component's own `props`:
+Each view's handlers belong to that view. With several views in one instance, a click changes only the view that
+was clicked:
 
 ```js
 import { Stratox } from 'stratox';
 
 Stratox.setComponent('Counter', ({ props, view, html }) => html`
   <p>${props.label}: ${props.count}</p>
-  <button type="button" ${view.on('click', (data) => {
-    if (data === props) {
-      data.count += 1;
-    }
-  })}>Add one</button>
+  <button type="button" ${view.on('click', (data) => { data.count += 1; })}>Add one</button>
 `);
 
 const counters = new Stratox('#counters');
@@ -146,7 +137,9 @@ more.execute();
 ```
 {% endcode %}
 
-Inline handlers need a Content Security Policy that allows inline script. Prefer `on()` in new code.
+Unlike `on()`, the callback of `bind()` runs once for every view of the instance, each time with that view's data
+and item. With one view per instance it runs once. Inline handlers also need a Content Security Policy that allows
+inline script. Prefer `on()` in new code.
 
 ## bindEvent() and off()
 
