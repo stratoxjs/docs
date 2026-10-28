@@ -195,5 +195,6 @@ rendered: update
 {% endcode %}
 
 The first render calls `done` on a timer, after `execute()` has returned. To work with the rendered elements, use
-`view.getElement()`, which returns the instance's elements. With the default `propagation` setting, some updates
-reach the page a moment after `done` has run; see [Configuration](../configuration.md#propagation).
+`view.getElement()`, which returns the instance's elements. When your code updates a view several times at the same
+moment, the later renders reach the page a moment after their `done`; see
+[Configuration](../configuration.md#propagation).

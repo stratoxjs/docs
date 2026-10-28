@@ -40,7 +40,7 @@ deeper, so `{ handlers: { fields } }` keeps the default `helper`.
 | `morph` | `true` | Updates change only what differs, so focus and typed text stay. With `false`, an update replaces the element's content. |
 | `classes` | `{}` | Layout classes of the form builder's markup. See [Styling forms](form-builder/styling.md). |
 | `icons` | `{}` | The icons of the repeater buttons: `add` and `delete`, as HTML. |
-| `propagation` | `true` | Some renders are written to the page on a short timer, so that many renders in a row are written once. See below. |
+| `propagation` | `true` | Renders at the same moment are written to the page once: the first at once, the rest together a moment later. See below. |
 
 ## handlers.helper
 
@@ -80,10 +80,10 @@ code of yours expects new elements after each update.
 
 ## propagation
 
-With the default `propagation: true`, a render that comes after one that was written at once waits for a short timer
-(`setTimeout` with 0), and renders that pile up in the meantime are written to the page once. That keeps a loop of
-updates from writing the page again and again. It also means that the page is not always up to date right after an
-`update()`: here every second update shows a moment later.
+When code renders the same view several times at the same moment, in one run of your script such as a loop, the
+first render is written to the page at once and the others are collected and written once, on a short timer
+(`setTimeout` with 0). That keeps a loop of updates from writing the page again and again. Updates at different
+moments, such as one per click or keystroke, are each written at once:
 
 ```js
 Stratox.setComponent('Step', ({ props, html }) => html`<p>Step ${props.step}</p>`);
@@ -93,22 +93,23 @@ steps.view('Step', { step: 0 });
 steps.execute();
 
 const shown = [];
-for (const step of [1, 2, 3, 4]) {
+for (const step of [1, 2, 3]) {
   steps.update('Step', { step });
   shown.push(document.querySelector('#steps p').textContent);
-  await new Promise((resolve) => setTimeout(resolve, 20));
 }
+await new Promise((resolve) => setTimeout(resolve, 0));
+shown.push(document.querySelector('#steps p').textContent);
 console.log(shown.join(', '));
 ```
 
 {% code title="Result" %}
 ```
-Step 1, Step 1, Step 3, Step 3
+Step 1, Step 1, Step 1, Step 3
 ```
 {% endcode %}
 
-Code that reads the page right after an update should wait a moment first. With `propagation: false`, every render is
-written at once, and the same loop shows `Step 1, Step 2, Step 3, Step 4`.
+The three updates in the loop give one write at once and one write a moment later, with the last data. With
+`propagation: false`, every render is written at once.
 
 ## Settings of your own
 
